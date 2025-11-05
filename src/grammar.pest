@@ -1,0 +1,3 @@
+complete   = { "[" ~ ("x" | "X") ~ "]" }
+incomplete = { "[" ~ " " ~ "]" }
+status = { SOI ~ (complete | incomplete) ~ EOI }
