@@ -11,6 +11,5 @@ Parser validates if string is one of next stateses:
 
 How results used
     If successful: Turn Ok
-    
     If unsuccessful: Turn Err(...)
 
