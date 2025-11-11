@@ -1,3 +1,52 @@
-complete   = { "[" ~ ("x" | "X") ~ "]" }
-incomplete = { "[" ~ " " ~ "]" }
-status = { SOI ~ (complete | incomplete) ~ EOI }
+// skip whitespaces
+WHITESPACE = _{ " " | "\t" }
+NEWLINE = { "\r\n" | "\n" | "\r" }
+
+// task complete = DONE / done
+complete = { "[" ~ ("D"|"d") ~ ("O"|"o") ~ ("N"|"n") ~ ("E"|"e") ~ "]" }
+
+// incomplete = TODO/ todo
+incomplete = { "[" ~ ("T"|"t") ~ ("O"|"o") ~ ("D"|"d") ~ ("O"|"o") ~ "]" }
+
+// inprogress = DOING / doing
+in_progress = { "[" ~ ("D"|"d") ~ ("O"|"o") ~ ("I"|"i") ~ ("N"|"n") ~ ("G"|"g") ~ "]" }
+
+// overall status
+status = { complete | incomplete | in_progress }
+
+// checking the priority of the task
+priority = { "***" | "**" | "*" }
+
+// date components 
+digit = { ASCII_DIGIT }
+year = { digit{4} }
+month = { digit{2} }
+day = { digit{2} }
+
+// date to which you have to complete
+due_date = { "@" ~ year ~ "-" ~ month ~ "-" ~ day }
+
+// date of the start 
+start_date = { "^" ~ year ~ "-" ~ month ~ "-" ~ day }
+
+// checking tag of the task
+tag_char = { LETTER | NUMBER | "_" | "-" }
+tag = { "+" ~ tag_char+ }
+
+text_char = { !("+" | "@" | "^" | NEWLINE) ~ ANY }
+text = @{ text_char+ }
+
+description_part = { due_date | start_date | tag | text }
+description = { description_part+ }
+
+empty_line = { NEWLINE }
+
+task = { priority? ~ status ~ description }
+
+file = { 
+    SOI ~ 
+    (task ~ NEWLINE | empty_line)* ~ 
+    task? ~ 
+    NEWLINE? ~ 
+    EOI 
+}

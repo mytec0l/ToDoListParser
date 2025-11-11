@@ -1,5 +1,5 @@
 [package]
-name = "ToDoListParser"
+name = "todo_list_parser"
 version = "0.1.0"
 edition = "2024"
 license = "MIT"
@@ -9,3 +9,4 @@ description = "A parser for todo list"
 anyhow = "1.0.100"
 pest = "2.8.3"
 pest_derive = "2.8.3"
+clap = { version = "4.5.51", features = ["derive"] }

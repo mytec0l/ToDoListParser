@@ -1,0 +1,8 @@
+*** [DONE] Write Reamde @2025-11-15 ^2025-11-01
+* [TODO] Drink water @2025-11-10 ^2025-11-05
+** [DOING] Go sleep @2025-11-20 ^2025-11-03
+[TODO] Do rustlinks @2025-11-12
+*** [TODO] Exorcism 99 @2025-11-08 ^2025-11-02
+* [DONE] Exorcism 60 @2025-11-25 ^2025-11-04
+[DOING] Have a dinner ^2025-11-06
+** [TODO] Wake up
