@@ -2,6 +2,8 @@
 
 A lightweight, command-line tool written in Rust for parsing, organizing, and sorting task lists from plain text files. This parser provides comprehensive task management capabilities including priority levels, status tracking, and date-based organization.
 
+[Crates.io](https://crates.io/crates/todo_list_parser)
+
 ## Technical Description
 
 ### Parsing Process
