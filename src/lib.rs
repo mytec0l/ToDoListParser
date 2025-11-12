@@ -1,7 +1,8 @@
-use anyhow::{Result, anyhow};
 use pest::Parser;
 use pest::iterators::Pair;
 use pest_derive::Parser;
+use std::error::Error as StdError;
+use thiserror::Error;
 
 #[derive(Parser)]
 #[grammar = "./grammar.pest"]
@@ -34,6 +35,18 @@ pub struct Task {
     pub priority: Option<Priority>,
     pub status: Status,
     pub description: Vec<DescriptionPart>,
+}
+
+#[derive(Error, Debug)]
+pub enum ParseError {
+    #[error("Failed to parse file: {0}")]
+    PestError(Box<dyn StdError + Send + Sync>),
+
+    #[error("No tasks found in file")]
+    EmptyFile,
+
+    #[error("Task missing required status")]
+    MissingStatus,
 }
 
 fn build_priority(pair: Pair<Rule>) -> Priority {
@@ -76,7 +89,7 @@ fn build_description(pair: Pair<Rule>) -> Vec<DescriptionPart> {
     parts
 }
 
-fn build_task(pair: Pair<Rule>) -> Task {
+fn build_task(pair: Pair<Rule>) -> Result<Task, ParseError> {
     let mut priority = None;
     let mut status = None;
     let mut description = Vec::new();
@@ -90,27 +103,28 @@ fn build_task(pair: Pair<Rule>) -> Task {
         }
     }
 
-    Task {
+    Ok(Task {
         priority,
-        status: status.expect("Error you have to write status"),
+        status: status.ok_or(ParseError::MissingStatus)?,
         description,
-    }
+    })
 }
 
-pub fn parse_file(file_content: &str) -> Result<Vec<Task>> {
-    let file_pair = Grammar::parse(Rule::file, file_content)?
+pub fn parse_file(file_content: &str) -> Result<Vec<Task>, ParseError> {
+    let file_pair = Grammar::parse(Rule::file, file_content)
+        .map_err(|e| ParseError::PestError(Box::new(e)))?
         .next()
-        .ok_or_else(|| anyhow!("Error with parsing"))?;
+        .ok_or(ParseError::EmptyFile)?;
 
     let mut tasks = Vec::new();
 
     for pair in file_pair.into_inner() {
         match pair.as_rule() {
             Rule::task => {
-                tasks.push(build_task(pair));
+                tasks.push(build_task(pair)?);
             }
             Rule::empty_line | Rule::NEWLINE | Rule::EOI => {}
-            _ => unreachable!("Eror rule in file {:?}", pair.as_rule()),
+            _ => unreachable!("Error rule in file {:?}", pair.as_rule()),
         }
     }
 

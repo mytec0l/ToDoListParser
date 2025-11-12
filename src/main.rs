@@ -1,7 +1,5 @@
-use anyhow::{Result, anyhow};
 use clap::{Parser, Subcommand};
 use std::fs;
-
 use std::path::PathBuf;
 
 use todo_list_parser::{DescriptionPart, Priority, Status, Task, parse_file};
@@ -106,7 +104,7 @@ fn status_order(status: &Status) -> u8 {
     }
 }
 
-fn main() -> Result<()> {
+fn main() {
     let cli = Cli::parse();
 
     match &cli.command {
@@ -117,10 +115,21 @@ fn main() -> Result<()> {
             sort_by_start,
             sort_by_due,
         } => {
-            let file_content = fs::read_to_string(file)
-                .map_err(|e| anyhow!("cant read '{}':\n  Error {}\n", file.display(), e))?;
+            let file_content = match fs::read_to_string(file) {
+                Ok(content) => content,
+                Err(e) => {
+                    eprintln!("Error: Can't read '{}': {}", file.display(), e);
+                    return;
+                }
+            };
 
-            let mut tasks = parse_file(&file_content)?;
+            let mut tasks = match parse_file(&file_content) {
+                Ok(tasks) => tasks,
+                Err(e) => {
+                    eprintln!("Error: {}", e);
+                    return;
+                }
+            };
 
             let sort_type = if *sort_by_priority {
                 "Priority"
@@ -161,6 +170,4 @@ fn main() -> Result<()> {
             print_credits();
         }
     }
-
-    Ok(())
 }
